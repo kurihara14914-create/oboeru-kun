@@ -108,7 +108,6 @@ const els = {
   addManual: document.querySelector("#addManual"),
   bulkText: document.querySelector("#bulkText"),
   importBulk: document.querySelector("#importBulk"),
-  sampleBulk: document.querySelector("#sampleBulk"),
   copyAiPrompt: document.querySelector("#copyAiPrompt"),
   deleteAllCards: document.querySelector("#deleteAllCards"),
   cardManager: document.querySelector("#cardManager"),
@@ -533,11 +532,11 @@ function renderSubjectPicker() {
 }
 
 function renderManagerControls() {
-  const selected = els.managerSubject.value || "すべて";
-  els.managerSubject.innerHTML = ["すべて", ...SUBJECTS]
+  const selected = els.managerSubject.value || "全科目";
+  els.managerSubject.innerHTML = ["全科目", ...SUBJECTS]
     .map((subject) => `<option value="${escapeHtml(subject)}">${escapeHtml(subject)}</option>`)
     .join("");
-  els.managerSubject.value = [...SUBJECTS, "すべて"].includes(selected) ? selected : "すべて";
+  els.managerSubject.value = [...SUBJECTS, "全科目"].includes(selected) ? selected : "全科目";
 }
 
 function renderTraining() {
@@ -571,10 +570,10 @@ function renderTraining() {
 
 function renderCardManager() {
   const query = normalize(els.managerSearch.value);
-  const selectedSubject = els.managerSubject.value || "すべて";
+  const selectedSubject = els.managerSubject.value || "全科目";
   const sortMode = els.managerSort.value || "created-desc";
   const cards = state.data.cards
-    .filter((card) => selectedSubject === "すべて" || card.subject === selectedSubject)
+    .filter((card) => selectedSubject === "全科目" || card.subject === selectedSubject)
     .filter((card) => {
       if (!query) return true;
       return normalize(`${card.subject} ${card.prompt} ${card.answer}`).includes(query);
@@ -1023,20 +1022,6 @@ els.addManual.addEventListener("click", () => {
 els.importBulk.addEventListener("click", () => {
   const cards = parseMarkdown(els.bulkText.value, state.selectedSubject);
   addCards(cards);
-});
-
-els.sampleBulk.addEventListener("click", () => {
-  els.bulkText.value = `# 英語
-- abandon: 捨てる / 放棄する
-- estimate: 見積もる / 推定する
-
-# 地理
-- 季節によって向きが変わる風を？？？という: 季節風
-- 熱帯・亜熱帯で単一の商品作物を大規模に栽培する農園を？？？という: プランテーション
-
-# 化学
-- 6.02×10^23個の粒子の集まりを？？？という: モル
-- 窒素と水素からアンモニアを合成する方法を？？？という: ハーバー・ボッシュ法`;
 });
 
 els.copyAiPrompt.addEventListener("click", async () => {

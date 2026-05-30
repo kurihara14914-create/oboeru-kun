@@ -95,7 +95,7 @@
       <section class="view" id="createView" aria-label="単語カード作成/管理">
         <div class="mode-switch" aria-label="単語カード作成と管理の切替">
           <button class="mode-switch-button active" type="button" data-create-section="createPanel">新規作成</button>
-          <button class="mode-switch-button" type="button" data-create-section="managePanel">管理</button>
+          <button class="mode-switch-button" type="button" data-create-section="managePanel">管理・編集</button>
         </div>
 
         <section class="create-panel active" id="createPanel" aria-label="新規カード作成">
@@ -129,15 +129,14 @@
             <textarea id="bulkText" spellcheck="false" placeholder="- abandon: 捨てる / 放棄する&#10;- 季節によって向きが変わる風を？？？という: 季節風"></textarea>
             <div class="action-grid">
               <button id="importBulk" type="button">まとめて追加</button>
-              <button id="sampleBulk" type="button" class="secondary">例を入れる</button>
             </div>
           </div>
         </section>
 
-        <section class="create-panel" id="managePanel" aria-label="単語カード管理">
+        <section class="create-panel" id="managePanel" aria-label="単語カード管理・編集">
           <div class="section-head compact">
             <div>
-              <h2 class="manager-title">単語カード管理</h2>
+              <h2 class="manager-title">単語カード管理・編集</h2>
             </div>
             <button id="deleteAllCards" type="button" class="danger">全削除</button>
           </div>
