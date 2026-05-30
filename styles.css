@@ -70,6 +70,7 @@ button.secondary {
 button.danger,
 .small-danger {
   color: #fff;
+  font-weight: 500;
   border-color: var(--delete-line);
   background: linear-gradient(180deg, var(--delete), var(--delete-2));
   box-shadow:
@@ -478,16 +479,19 @@ h2 {
 }
 
 .manager-delete-action {
-  width: min(100%, 180px);
+  width: min(100%, 144px);
   justify-self: end;
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 0.82rem;
 }
 
 .small-danger {
-  min-width: 68px;
-  min-height: 40px;
+  min-width: 54px;
+  min-height: 32px;
   align-self: center;
-  padding: 0 12px;
-  font-size: 0.88rem;
+  padding: 0 10px;
+  font-size: 0.76rem;
 }
 
 .delete-check {
