@@ -590,14 +590,17 @@ els.answerForm.addEventListener("submit", (event) => {
   const score = answerScore(els.answer.value, card.answer);
   if (score >= 0.72) {
     applyCorrect(card);
+    state.session.awaitingNext = true;
     els.feedback.className = "feedback good";
     els.feedback.textContent = `正解。${card.answer}`;
     els.combo.textContent = String(state.session.combo);
     els.score.textContent = `Score ${state.session.score}`;
+    els.answer.disabled = true;
+    els.hint.disabled = true;
+    els.skip.textContent = "次へ進む";
     renderToday();
     renderWeakList();
     renderRecords();
-    window.setTimeout(renderTraining, 700);
     return;
   }
 
