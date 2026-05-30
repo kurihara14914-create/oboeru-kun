@@ -110,7 +110,7 @@
 
           <div class="submode-switch" aria-label="追加方法">
             <button class="submode-button active" type="button" data-create-mode="singleCreate">1枚ずつ</button>
-            <button class="submode-button" type="button" data-create-mode="bulkCreate">まとめて貼る</button>
+            <button class="submode-button" type="button" data-create-mode="bulkCreate">画像・文章からAIで追加</button>
           </div>
 
           <div class="create-mode active" id="singleCreate">
@@ -126,6 +126,11 @@
               <label class="input-label" for="bulkText">Markdownまとめ貼り</label>
               <button id="copyAiPrompt" type="button" class="secondary small-action">AIプロンプト</button>
             </div>
+            <ol class="process-steps" aria-label="AI追加の手順">
+              <li><strong>ステップ1</strong><span>AIプロンプトをコピーして、AIアプリに写真や文章と一緒に渡す</span></li>
+              <li><strong>ステップ2</strong><span>AIが作ったMarkdown形式の単語カードをコピーする</span></li>
+              <li><strong>ステップ3</strong><span>下の欄に貼り付けて「まとめて追加」を押す</span></li>
+            </ol>
             <textarea id="bulkText" spellcheck="false" placeholder="- abandon: 捨てる / 放棄する&#10;- 季節によって向きが変わる風を？？？という: 季節風"></textarea>
             <div class="action-grid">
               <button id="importBulk" type="button">まとめて追加</button>
@@ -184,7 +189,7 @@
       <nav class="bottom-nav" aria-label="画面切替">
         <button class="nav-item active" type="button" data-view="todayView">今日</button>
         <button class="nav-item" type="button" data-view="trainView">覚える</button>
-        <button class="nav-item" type="button" data-view="createView">単語カード作成/管理</button>
+        <button class="nav-item" type="button" data-view="createView" aria-label="単語カード作成/管理">作成/管理</button>
         <button class="nav-item" type="button" data-view="weakView">弱点</button>
         <button class="nav-item" type="button" data-view="recordView">記録</button>
       </nav>
