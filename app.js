@@ -694,7 +694,18 @@ function renderRecords() {
       const mastered = cards.filter(isMasteredCard).length;
       const notMastered = cards.length - mastered;
       const due = cards.filter((card) => card.dueAt <= TODAY).length;
-      return `<article class="list-item"><div><strong>${escapeHtml(subject)}</strong><p>単語カード${cards.length}枚 / 今日${due}枚</p></div><small>覚えた${mastered}枚 / まだ${notMastered}枚</small></article>`;
+      return `
+        <article class="list-item record-subject-item">
+          <div>
+            <strong>${escapeHtml(subject)}</strong>
+            <p>単語カード${cards.length}枚 / 今日${due}枚</p>
+          </div>
+          <div class="record-status" aria-label="${escapeHtml(subject)}の習得状況">
+            <div class="record-status-row mastered"><span>覚えた</span><strong>${mastered}枚</strong></div>
+            <div class="record-status-row pending"><span>まだ</span><strong>${notMastered}枚</strong></div>
+          </div>
+        </article>
+      `;
     })
     .join("");
 }

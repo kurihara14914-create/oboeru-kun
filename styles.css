@@ -13,7 +13,8 @@
   --selected-2: #7f90a8;
   --selected-ink: #1f344d;
   --good: #16784f;
-  --bad: #bd2f22;
+  --bad: #9b4a43;
+  --bad-2: #7d3934;
   --soft: #eef6f7;
   --shadow: 0 16px 44px rgba(23, 24, 28, 0.1);
   --nav-height: 76px;
@@ -67,6 +68,7 @@ button.danger,
 .small-danger {
   color: #fff;
   background: var(--bad);
+  box-shadow: none;
 }
 
 button:disabled,
@@ -359,6 +361,47 @@ h2 {
   font-weight: 900;
 }
 
+.record-subject-item {
+  align-items: stretch;
+}
+
+.record-status {
+  display: grid;
+  min-width: 132px;
+  gap: 8px;
+}
+
+.record-status-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 10px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.record-status-row.mastered {
+  color: #c84c35;
+  background: #fff2ee;
+}
+
+.record-status-row.pending {
+  color: #2d6594;
+  background: #edf6ff;
+}
+
+.record-status-row span {
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.record-status-row strong {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
 .manage-item {
   align-items: stretch;
 }
@@ -403,6 +446,7 @@ h2 {
   min-height: 40px;
   align-self: center;
   padding: 0 12px;
+  background: var(--bad-2);
   font-size: 0.88rem;
 }
 
