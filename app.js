@@ -123,6 +123,7 @@ const els = {
   todayCorrect: document.querySelector("#todayCorrect"),
   todayMistakes: document.querySelector("#todayMistakes"),
   totalReviews: document.querySelector("#totalReviews"),
+  totalStudyTime: document.querySelector("#totalStudyTime"),
   subjectStats: document.querySelector("#subjectStats"),
   resetData: document.querySelector("#resetData"),
   toggleBgm: document.querySelector("#toggleBgm"),
@@ -143,6 +144,7 @@ let bgmTimer;
 let bgmStep = 0;
 let bgmEnabled = false;
 let editingCardId = "";
+let studyTickStartedAt = document.visibilityState === "visible" ? Date.now() : 0;
 
 function loadData() {
   const initial = {
@@ -151,6 +153,7 @@ function loadData() {
       xp: 0,
       bestCombo: 0,
       totalReviews: 0,
+      totalStudySeconds: 0,
       today: TODAY,
       todayCorrect: 0,
       todayMistakes: 0,
@@ -678,6 +681,7 @@ function renderRecords() {
   els.todayCorrect.textContent = String(state.data.stats.todayCorrect);
   els.todayMistakes.textContent = String(state.data.stats.todayMistakes);
   els.totalReviews.textContent = String(state.data.stats.totalReviews);
+  els.totalStudyTime.textContent = formatStudyTime(currentStudySeconds());
 
   const grouped = groupBySubject(state.data.cards);
   if (!state.data.cards.length) {
@@ -687,15 +691,45 @@ function renderRecords() {
 
   els.subjectStats.innerHTML = Object.entries(grouped)
     .map(([subject, cards]) => {
-      const mistakes = cards.reduce((sum, card) => sum + card.mistakes, 0);
+      const mastered = cards.filter(isMasteredCard).length;
+      const notMastered = cards.length - mastered;
       const due = cards.filter((card) => card.dueAt <= TODAY).length;
-      return `<article class="list-item"><div><strong>${escapeHtml(subject)}</strong><p>単語カード${cards.length}枚 / 今日${due}枚</p></div><small>${mistakes}ミス</small></article>`;
+      return `<article class="list-item"><div><strong>${escapeHtml(subject)}</strong><p>単語カード${cards.length}枚 / 今日${due}枚</p></div><small>覚えた${mastered}枚 / まだ${notMastered}枚</small></article>`;
     })
     .join("");
 }
 
+function isMasteredCard(card) {
+  return card.mistakes > 0 && card.correctStreak >= 2;
+}
+
 function masteredCards() {
-  return state.data.cards.filter((card) => card.mistakes > 0 && card.correctStreak >= 2);
+  return state.data.cards.filter(isMasteredCard);
+}
+
+function currentStudySeconds() {
+  const saved = Number(state.data.stats.totalStudySeconds) || 0;
+  if (!studyTickStartedAt || document.visibilityState !== "visible") return saved;
+  return saved + Math.floor(Math.max(0, Date.now() - studyTickStartedAt) / 1000);
+}
+
+function accrueStudyTime() {
+  if (!studyTickStartedAt) return;
+  const now = Date.now();
+  const seconds = Math.floor(Math.max(0, now - studyTickStartedAt) / 1000);
+  if (seconds > 0) {
+    state.data.stats.totalStudySeconds = (Number(state.data.stats.totalStudySeconds) || 0) + seconds;
+    studyTickStartedAt = now;
+  }
+}
+
+function formatStudyTime(seconds) {
+  if (seconds < 60) return `${seconds}秒`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}分`;
+  const hours = Math.floor(minutes / 60);
+  const restMinutes = minutes % 60;
+  return restMinutes ? `${hours}時間${restMinutes}分` : `${hours}時間`;
 }
 
 function groupBySubject(cards) {
@@ -1095,12 +1129,35 @@ els.editPanel.addEventListener("click", (event) => {
   if (event.target === els.editPanel) closeEditPanel();
 });
 
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    accrueStudyTime();
+    saveData();
+    return;
+  }
+  studyTickStartedAt = Date.now();
+  renderRecords();
+});
+
+window.addEventListener("beforeunload", () => {
+  accrueStudyTime();
+  saveData();
+});
+
+window.setInterval(() => {
+  if (document.visibilityState !== "visible") return;
+  accrueStudyTime();
+  saveData();
+  renderRecords();
+}, 30000);
+
 els.resetData.addEventListener("click", () => {
   const ok = window.confirm("単語カードと記録をすべて削除しますか？");
   if (!ok) return;
   localStorage.removeItem(STORAGE_KEY);
   state.data = loadData();
   state.session = { ids: [], answered: 0, mode: "今日の復習", score: 0, combo: 0, awaitingNext: false };
+  studyTickStartedAt = Date.now();
   renderAll();
   showToast("リセットしました");
 });

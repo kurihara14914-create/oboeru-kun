@@ -261,7 +261,7 @@ h2 {
 }
 
 .record-grid {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .quick-stats div,
@@ -609,6 +609,8 @@ h2 {
 }
 
 .nav-item {
+  display: grid;
+  place-items: center;
   min-height: 48px;
   border-radius: 8px;
   padding: 0;
@@ -617,6 +619,10 @@ h2 {
   font-size: 0.78rem;
   line-height: 1.15;
   white-space: normal;
+}
+
+.nav-item:not([data-view="createView"]) {
+  transform: translateY(-6px);
 }
 
 .nav-item.active {
@@ -628,6 +634,8 @@ h2 {
 
 .nav-item[data-view="createView"] {
   position: relative;
+  display: grid;
+  place-items: center;
   justify-self: center;
   width: 128px;
   min-width: 128px;
