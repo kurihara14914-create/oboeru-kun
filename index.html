@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>覚えるくん</title>
+    <meta name="theme-color" content="#156f7a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="覚えるくん" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">oboeru-kun</p>
+          <h1>覚えるくん</h1>
+        </div>
+        <button class="icon-button" id="resetData" type="button" title="単語カードと記録をリセット" aria-label="単語カードと記録をリセット">
+          <span aria-hidden="true">↺</span>
+        </button>
+      </header>
+
+      <section class="view active" id="todayView" aria-label="今日">
+        <div class="hero">
+          <p class="mode-label">今日のトレーニング</p>
+          <h2><span id="dueCount">0</span>枚の単語カードが出番です</h2>
+          <div class="meter" aria-label="レベル進捗">
+            <span id="xpBar"></span>
+          </div>
+        </div>
+
+        <div class="quick-stats" aria-label="学習状況">
+          <div>
+            <strong id="level">1</strong>
+            <span>Level</span>
+          </div>
+          <div>
+            <strong id="xp">0</strong>
+            <span>XP</span>
+          </div>
+          <div>
+            <strong id="bestCombo">0</strong>
+            <span>最高コンボ</span>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <button id="startDue" type="button">今日の復習</button>
+          <button id="startWeak" type="button" class="secondary">弱点だけ</button>
+          <button id="startAll" type="button" class="secondary">全単語カード</button>
+        </div>
+
+        <div class="subject-strip" id="todaySubjects" aria-label="科目別状況"></div>
+      </section>
+
+      <section class="view" id="trainView" aria-label="特訓">
+        <div class="training-card">
+          <div class="train-head">
+            <span id="trainSubject" class="subject-badge">未設定</span>
+            <span id="sessionProgress">0 / 0</span>
+          </div>
+          <p class="mode-label" id="trainModeLabel">特訓</p>
+          <h2 id="question">単語カードを作ると開始できます。</h2>
+          <form id="answerForm" class="answer-form">
+            <input id="answer" type="text" autocomplete="off" placeholder="答えを入力" />
+            <button type="submit">判定</button>
+          </form>
+          <div class="feedback" id="feedback" aria-live="polite"></div>
+          <div class="combo-line">
+            <strong><span id="combo">0</span> Combo</strong>
+            <span id="score">Score 0</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="hint" type="button" class="secondary">ヒント</button>
+          <button id="skip" type="button" class="secondary">次へ</button>
+        </div>
+      </section>
+
+      <section class="view" id="createView" aria-label="作成">
+        <div class="section-head">
+          <div>
+            <p class="mode-label">単語カード作成</p>
+            <h2>貼って、選んで、追加</h2>
+          </div>
+          <button id="copyAiPrompt" type="button" class="secondary">AIプロンプト</button>
+        </div>
+
+        <div class="subject-picker" id="subjectPicker" aria-label="科目選択"></div>
+
+        <label class="input-label" for="manualFront">表: 穴埋め文</label>
+        <input id="manualFront" type="text" placeholder="例: abandon = ？？？" />
+        <label class="input-label" for="manualBack">裏: ？？？に入る答え</label>
+        <input id="manualBack" type="text" placeholder="例: 捨てる / 放棄する" />
+        <button id="addManual" type="button">1枚追加</button>
+
+        <label class="input-label" for="bulkText">Markdownまとめ貼り</label>
+        <textarea id="bulkText" spellcheck="false" placeholder="- abandon = ？？？: 捨てる / 放棄する&#10;- 季節によって向きが変わる風を？？？という: 季節風"></textarea>
+        <div class="action-grid">
+          <button id="importBulk" type="button">まとめて追加</button>
+          <button id="sampleBulk" type="button" class="secondary">例を入れる</button>
+        </div>
+
+        <div class="section-head compact">
+          <div>
+            <p class="mode-label">単語カード管理</p>
+            <h2>いらないものを消す</h2>
+          </div>
+          <button id="deleteAllCards" type="button" class="danger">全削除</button>
+        </div>
+        <div class="card-list" id="cardManager"></div>
+      </section>
+
+      <section class="view" id="weakView" aria-label="弱点">
+        <div class="section-head">
+          <div>
+            <p class="mode-label">弱点リスト</p>
+            <h2>間違えた順に潰す</h2>
+          </div>
+          <button id="weakStartTop" type="button">特訓</button>
+        </div>
+        <div class="card-list" id="weakList"></div>
+      </section>
+
+      <section class="view" id="recordView" aria-label="記録">
+        <div class="section-head">
+          <div>
+            <p class="mode-label">記録</p>
+            <h2>伸びている数字</h2>
+          </div>
+        </div>
+        <div class="record-grid">
+          <div><strong id="totalCards">0</strong><span>単語カード</span></div>
+          <div><strong id="todayCorrect">0</strong><span>今日の正解</span></div>
+          <div><strong id="todayMistakes">0</strong><span>今日のミス</span></div>
+          <div><strong id="totalReviews">0</strong><span>累計回答</span></div>
+        </div>
+        <div class="card-list" id="subjectStats"></div>
+      </section>
+
+      <nav class="bottom-nav" aria-label="画面切替">
+        <button class="nav-item active" type="button" data-view="todayView">今日</button>
+        <button class="nav-item" type="button" data-view="trainView">特訓</button>
+        <button class="nav-item" type="button" data-view="createView">作成/管理</button>
+        <button class="nav-item" type="button" data-view="weakView">弱点</button>
+        <button class="nav-item" type="button" data-view="recordView">記録</button>
+      </nav>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
