@@ -112,6 +112,7 @@ const els = {
   importBulk: document.querySelector("#importBulk"),
   copyAiPrompt: document.querySelector("#copyAiPrompt"),
   deleteAllCards: document.querySelector("#deleteAllCards"),
+  managerCardCount: document.querySelector("#managerCardCount"),
   cardManager: document.querySelector("#cardManager"),
   managerSearch: document.querySelector("#managerSearch"),
   managerSubject: document.querySelector("#managerSubject"),
@@ -613,6 +614,7 @@ function renderTraining() {
 }
 
 function renderCardManager() {
+  els.managerCardCount.textContent = String(state.data.cards.length);
   const query = normalize(els.managerSearch.value);
   const selectedSubject = els.managerSubject.value || "全科目";
   const sortMode = els.managerSort.value || "created-desc";

@@ -13,8 +13,8 @@
   --selected-2: #7f90a8;
   --selected-ink: #1f344d;
   --good: #16784f;
-  --bad: #8b6763;
-  --bad-2: #725854;
+  --bad: #a45166;
+  --bad-2: #884455;
   --soft: #eef6f7;
   --shadow: 0 16px 44px rgba(23, 24, 28, 0.1);
   --nav-height: 76px;
@@ -281,6 +281,7 @@ h2 {
 .record-stat-button {
   color: var(--ink);
   border-radius: 0;
+  font-weight: 400;
   text-align: left;
 }
 
@@ -304,6 +305,7 @@ h2 {
 .subject-tile span,
 .empty {
   color: var(--muted);
+  font-weight: 400;
 }
 
 .action-grid,
@@ -377,14 +379,15 @@ h2 {
 }
 
 .record-status-row {
-  display: grid;
+  display: flex;
   align-items: baseline;
-  justify-items: start;
+  gap: 10px;
   min-height: auto;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
+  font-weight: 400;
 }
 
 .record-status-row.mastered {
@@ -397,11 +400,12 @@ h2 {
 
 .record-status-row span {
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 400;
 }
 
 .record-status-row strong {
   font-size: 1.35rem;
+  font-weight: 800;
   line-height: 1;
 }
 
@@ -442,6 +446,27 @@ h2 {
   padding: 12px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: var(--shadow);
+}
+
+.manager-count {
+  display: grid;
+  min-width: 86px;
+  justify-items: end;
+  color: var(--muted);
+}
+
+.manager-count strong {
+  color: var(--ink);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.manager-count span {
+  font-size: 0.78rem;
+}
+
+.manager-delete-action {
+  width: 100%;
 }
 
 .small-danger {

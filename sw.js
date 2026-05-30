@@ -1,4 +1,4 @@
-const CACHE_NAME = "oboeru-kun-v16";
+const CACHE_NAME = "oboeru-kun-v17";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
