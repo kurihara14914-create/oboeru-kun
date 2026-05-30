@@ -83,13 +83,12 @@
         </div>
       </section>
 
-      <section class="view" id="createView" aria-label="作成">
+      <section class="view" id="createView" aria-label="単語カード作成/管理">
         <div class="section-head">
           <div>
-            <p class="mode-label">単語カード作成</p>
+            <p class="mode-label">単語カード作成/管理</p>
             <h2>貼って、選んで、追加</h2>
           </div>
-          <button id="copyAiPrompt" type="button" class="secondary">AIプロンプト</button>
         </div>
 
         <div class="subject-picker" id="subjectPicker" aria-label="科目選択"></div>
@@ -100,7 +99,10 @@
         <input id="manualBack" type="text" placeholder="例: 捨てる / 放棄する" />
         <button id="addManual" type="button">1枚追加</button>
 
-        <label class="input-label" for="bulkText">Markdownまとめ貼り</label>
+        <div class="label-row">
+          <label class="input-label" for="bulkText">Markdownまとめ貼り</label>
+          <button id="copyAiPrompt" type="button" class="secondary small-action">AIプロンプト</button>
+        </div>
         <textarea id="bulkText" spellcheck="false" placeholder="- abandon = ？？？: 捨てる / 放棄する&#10;- 季節によって向きが変わる風を？？？という: 季節風"></textarea>
         <div class="action-grid">
           <button id="importBulk" type="button">まとめて追加</button>
@@ -147,7 +149,7 @@
       <nav class="bottom-nav" aria-label="画面切替">
         <button class="nav-item active" type="button" data-view="todayView">今日</button>
         <button class="nav-item" type="button" data-view="trainView">特訓</button>
-        <button class="nav-item" type="button" data-view="createView">作成/管理</button>
+        <button class="nav-item" type="button" data-view="createView">単語カード作成/管理</button>
         <button class="nav-item" type="button" data-view="weakView">弱点</button>
         <button class="nav-item" type="button" data-view="recordView">記録</button>
       </nav>

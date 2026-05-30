@@ -418,7 +418,7 @@ function renderToday() {
 
   const grouped = groupBySubject(state.data.cards);
   if (!state.data.cards.length) {
-    els.todaySubjects.innerHTML = '<div class="empty">まずは「作成/管理」から単語カードを追加します。</div>';
+    els.todaySubjects.innerHTML = '<div class="empty">まずは「単語カード作成/管理」から単語カードを追加します。</div>';
     return;
   }
 
@@ -452,7 +452,9 @@ function renderTraining() {
     els.sessionProgress.textContent = `${state.session.answered} / ${state.session.answered}`;
     els.question.textContent = state.data.cards.length ? "このセッションは完了です。" : "単語カードを作ると開始できます。";
     els.feedback.className = "feedback";
-    els.feedback.textContent = state.data.cards.length ? "今日の数字を確認するか、別モードで続けられます。" : "「作成/管理」から単語カードを追加してください。";
+    els.feedback.textContent = state.data.cards.length
+      ? "今日の数字を確認するか、別モードで続けられます。"
+      : "「単語カード作成/管理」から単語カードを追加してください。";
     els.answer.value = "";
     return;
   }
