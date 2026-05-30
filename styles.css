@@ -15,6 +15,9 @@
   --good: #16784f;
   --bad: #a45166;
   --bad-2: #884455;
+  --delete: #8a8f95;
+  --delete-2: #676d74;
+  --delete-line: #5a6067;
   --soft: #eef6f7;
   --shadow: 0 16px 44px rgba(23, 24, 28, 0.1);
   --nav-height: 76px;
@@ -67,8 +70,17 @@ button.secondary {
 button.danger,
 .small-danger {
   color: #fff;
-  background: var(--bad);
-  box-shadow: none;
+  border-color: var(--delete-line);
+  background: linear-gradient(180deg, var(--delete), var(--delete-2));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 4px 10px rgba(34, 38, 44, 0.12);
+}
+
+button.danger:hover,
+.small-danger:hover {
+  background: linear-gradient(180deg, #7f848a, #5f656c);
 }
 
 button:disabled,
@@ -468,12 +480,6 @@ h2 {
 .manager-delete-action {
   width: min(100%, 180px);
   justify-self: end;
-  background: #6f767f;
-  color: #fff;
-}
-
-.manager-delete-action:hover {
-  background: #606771;
 }
 
 .small-danger {
@@ -481,7 +487,6 @@ h2 {
   min-height: 40px;
   align-self: center;
   padding: 0 12px;
-  background: var(--bad-2);
   font-size: 0.88rem;
 }
 
