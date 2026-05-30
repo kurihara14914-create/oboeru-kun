@@ -118,6 +118,7 @@ const els = {
   resetData: document.querySelector("#resetData"),
   toggleBgm: document.querySelector("#toggleBgm"),
   toast: document.querySelector("#toast"),
+  infoPop: document.querySelector("#infoPop"),
   resultEffect: document.querySelector("#resultEffect"),
   milestoneEffect: document.querySelector("#milestoneEffect"),
   editPanel: document.querySelector("#editPanel"),
@@ -639,6 +640,13 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => els.toast.classList.remove("show"), 1800);
 }
 
+function showInfo(message) {
+  els.infoPop.textContent = message;
+  els.infoPop.classList.remove("hidden");
+  window.clearTimeout(showInfo.timer);
+  showInfo.timer = window.setTimeout(() => els.infoPop.classList.add("hidden"), 4200);
+}
+
 function getAudioContext() {
   const AudioCtor = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtor) return null;
@@ -812,6 +820,12 @@ function triggerResultEffect(type, detail) {
   }, 2300);
 }
 
+function clearResultEffect() {
+  window.clearTimeout(triggerResultEffect.timer);
+  els.resultEffect.className = "result-effect";
+  els.resultEffect.innerHTML = "";
+}
+
 els.navItems.forEach((item) => {
   item.addEventListener("click", () => showView(item.dataset.view));
 });
@@ -891,6 +905,7 @@ els.hint.addEventListener("click", () => {
 
 els.skip.addEventListener("click", () => {
   if (state.session.awaitingNext) {
+    clearResultEffect();
     state.session.awaitingNext = false;
     renderTraining();
     return;
@@ -972,10 +987,10 @@ els.cardManager.addEventListener("click", (event) => {
 els.deleteAllCards.addEventListener("click", deleteAllCards);
 els.toggleBgm.addEventListener("click", toggleBgm);
 els.levelInfo.addEventListener("click", () => {
-  window.alert("Levelは累計XPから決まります。100XPたまるごとにLevelが1つ上がります。");
+  showInfo("Levelは累計XPから決まります。100XPたまるごとにLevelが1つ上がります。");
 });
 els.xpInfo.addEventListener("click", () => {
-  window.alert("XPは正解すると増える経験値です。続けるほどLevelが上がります。");
+  showInfo("XPは正解すると増える経験値です。続けるほどLevelが上がります。");
 });
 els.saveEdit.addEventListener("click", saveEditedCard);
 els.cancelEdit.addEventListener("click", closeEditPanel);

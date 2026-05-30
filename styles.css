@@ -563,6 +563,27 @@ h2 {
   display: block;
 }
 
+.info-pop {
+  position: fixed;
+  right: 14px;
+  top: max(76px, calc(env(safe-area-inset-top) + 66px));
+  left: 14px;
+  z-index: 25;
+  width: min(460px, calc(100% - 28px));
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--shadow);
+  line-height: 1.55;
+}
+
+.info-pop.hidden {
+  display: none;
+}
+
 .edit-panel {
   position: fixed;
   inset: 0;
