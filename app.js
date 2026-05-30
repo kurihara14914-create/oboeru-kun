@@ -725,8 +725,8 @@ function renderRecords() {
             <p>単語カード${cards.length}枚 / 今日${due}枚</p>
           </div>
           <div class="record-status" aria-label="${escapeHtml(subject)}の習得状況">
-            <button class="record-status-row mastered" type="button" data-mastered-info><span>覚えた</span><strong>${mastered}枚</strong></button>
-            <div class="record-status-row pending"><span>まだ</span><strong>${notMastered}枚</strong></div>
+            <button class="record-status-row mastered" type="button" data-mastered-info><span>覚えた</span><strong>${mastered}</strong></button>
+            <div class="record-status-row pending"><span>まだ</span><strong>${notMastered}</strong></div>
           </div>
         </article>
       `;
