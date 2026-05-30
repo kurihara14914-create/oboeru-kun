@@ -74,8 +74,12 @@ const els = {
   views: document.querySelectorAll(".view"),
   navItems: document.querySelectorAll(".nav-item"),
   dueCount: document.querySelector("#dueCount"),
+  progressDone: document.querySelector("#progressDone"),
+  progressTotal: document.querySelector("#progressTotal"),
   level: document.querySelector("#level"),
+  levelInfo: document.querySelector("#levelInfo"),
   xp: document.querySelector("#xp"),
+  xpInfo: document.querySelector("#xpInfo"),
   xpBar: document.querySelector("#xpBar"),
   bestCombo: document.querySelector("#bestCombo"),
   todaySubjects: document.querySelector("#todaySubjects"),
@@ -116,12 +120,19 @@ const els = {
   toast: document.querySelector("#toast"),
   resultEffect: document.querySelector("#resultEffect"),
   milestoneEffect: document.querySelector("#milestoneEffect"),
+  editPanel: document.querySelector("#editPanel"),
+  editSubject: document.querySelector("#editSubject"),
+  editFront: document.querySelector("#editFront"),
+  editBack: document.querySelector("#editBack"),
+  saveEdit: document.querySelector("#saveEdit"),
+  cancelEdit: document.querySelector("#cancelEdit"),
 };
 
 let audioContext;
 let bgmTimer;
 let bgmStep = 0;
 let bgmEnabled = false;
+let editingCardId = "";
 
 function loadData() {
   const initial = {
@@ -325,23 +336,37 @@ function startSession(cards, modeLabel) {
 function editCard(cardId) {
   const card = state.data.cards.find((item) => item.id === cardId);
   if (!card) return;
-  const prompt = window.prompt("表を編集", card.prompt);
-  if (prompt === null) return;
-  const answer = window.prompt("裏を編集", card.answer);
-  if (answer === null) return;
-  const subject = window.prompt(`科目を編集\n${SUBJECTS.join(" / ")}`, card.subject);
-  if (subject === null) return;
+  editingCardId = cardId;
+  els.editSubject.innerHTML = SUBJECTS.map(
+    (subject) => `<option value="${escapeHtml(subject)}">${escapeHtml(subject)}</option>`,
+  ).join("");
+  els.editSubject.value = normalizeSubject(card.subject);
+  els.editFront.value = card.prompt;
+  els.editBack.value = card.answer;
+  els.editPanel.classList.remove("hidden");
+  window.setTimeout(() => els.editFront.focus(), 80);
+}
 
-  const nextPrompt = cleanMarkdown(prompt);
-  const nextAnswer = cleanMarkdown(answer);
+function closeEditPanel() {
+  editingCardId = "";
+  els.editPanel.classList.add("hidden");
+}
+
+function saveEditedCard() {
+  const card = state.data.cards.find((item) => item.id === editingCardId);
+  if (!card) return closeEditPanel();
+
+  const nextPrompt = cleanMarkdown(els.editFront.value);
+  const nextAnswer = cleanMarkdown(els.editBack.value);
   if (!nextPrompt || !nextAnswer) return showToast("表と裏を入力してください");
 
   card.prompt = nextPrompt;
   card.answer = nextAnswer;
   card.detail = nextAnswer;
-  card.subject = normalizeSubject(cleanMarkdown(subject));
+  card.subject = normalizeSubject(els.editSubject.value);
   card.updatedAt = new Date().toISOString();
   saveData();
+  closeEditPanel();
   renderAll();
   showToast("単語カードを編集しました");
 }
@@ -455,12 +480,17 @@ function renderAll() {
 
 function renderToday() {
   const due = dueCards();
+  const done = state.data.stats.todayCorrect;
+  const total = done + due.length;
+  const progress = total ? Math.min(100, Math.round((done / total) * 100)) : 100;
   const level = Math.floor(state.data.stats.xp / 100) + 1;
   els.dueCount.textContent = String(due.length);
+  els.progressDone.textContent = String(done);
+  els.progressTotal.textContent = String(total);
   els.level.textContent = String(level);
   els.xp.textContent = String(state.data.stats.xp);
   els.bestCombo.textContent = String(state.data.stats.bestCombo);
-  els.xpBar.style.width = `${state.data.stats.xp % 100}%`;
+  els.xpBar.style.width = `${progress}%`;
 
   const grouped = groupBySubject(state.data.cards);
   if (!state.data.cards.length) {
@@ -528,7 +558,7 @@ function renderCardManager() {
             <span class="subject-badge">${escapeHtml(card.subject)}</span>
             <strong>${escapeHtml(card.prompt)}</strong>
             <p>${escapeHtml(card.answer)}</p>
-            <small>追加 ${formatDate(card.createdAt)} / 編集 ${formatDate(card.updatedAt || card.createdAt)}</small>
+            <small>追加日 ${formatDate(card.createdAt)} / 最終編集日 ${formatDate(card.updatedAt || card.createdAt)}</small>
           </button>
           <button class="small-danger" type="button" data-delete-card="${escapeHtml(card.id)}">削除</button>
         </article>
@@ -674,6 +704,11 @@ function playMilestoneSound(type) {
   playTone(783.99, 0.18, 0.18, "triangle", 0.08);
 }
 
+function noteFromDegree(root, degree, octave = 1) {
+  const major = [0, 2, 4, 5, 7, 9, 11, 12];
+  return root * 2 ** ((major[degree % major.length] + 12 * octave) / 12);
+}
+
 function triggerMilestone(type, text) {
   playMilestoneSound(type);
   els.milestoneEffect.className = `milestone-effect show ${type}`;
@@ -699,12 +734,33 @@ function maybeTriggerMilestones(previousScore, combo, score) {
 
 function playBgmStep() {
   if (!bgmEnabled) return;
-  const pattern = [261.63, 329.63, 392, 523.25, 392, 329.63, 440, 587.33];
-  const bass = [130.81, 130.81, 146.83, 146.83, 174.61, 174.61, 196, 196];
-  const note = pattern[bgmStep % pattern.length];
-  const bassNote = bass[bgmStep % bass.length];
-  playTone(note, 0, 0.22, "triangle", 0.018);
-  if (bgmStep % 2 === 0) playTone(bassNote, 0, 0.28, "sine", 0.012);
+  const roots = [261.63, 293.66, 329.63, 392, 440];
+  const progressions = [
+    [0, 4, 3, 4, 0, 2, 3, 4],
+    [0, 3, 4, 2, 0, 4, 1, 3],
+    [3, 4, 0, 2, 3, 1, 4, 0],
+    [0, 2, 4, 1, 3, 4, 2, 0],
+  ];
+  const melodies = [
+    [0, 2, 4, 5, 4, 2, 7, 5],
+    [4, 5, 7, 9, 7, 5, 4, 2],
+    [7, 5, 4, 2, 0, 2, 4, 5],
+    [2, 4, 5, 7, 9, 7, 5, 4],
+  ];
+  const beat = bgmStep % 8;
+  const bar = Math.floor(bgmStep / 8);
+  const section = Math.floor(bar / 16);
+  const progression = progressions[section % progressions.length];
+  const melody = melodies[(section + Math.floor(bar / 4)) % melodies.length];
+  const root = roots[(progression[bar % progression.length] + section) % roots.length];
+  const swing = section % 2 === 0 ? 0 : 0.035;
+  const leadGain = 0.012 + (section % 4) * 0.002;
+
+  if (beat === 0 || beat === 4) playTone(root / 2, 0, 0.36, "sine", 0.012);
+  if (beat % 2 === 0) playTone(noteFromDegree(root, melody[beat], 1), swing, 0.18, "triangle", leadGain);
+  if ((bar + section) % 3 === 0 && beat === 6) playTone(noteFromDegree(root, melody[(beat + 2) % 8], 2), 0, 0.12, "sine", 0.008);
+  if (beat === 2 || beat === 6) playNoise(0, 0.045, 0.006);
+  if (section % 3 === 2 && beat % 4 === 1) playTone(noteFromDegree(root, 7, 1), 0, 0.08, "square", 0.006);
   bgmStep += 1;
 }
 
@@ -753,7 +809,7 @@ function triggerResultEffect(type, detail) {
   triggerResultEffect.timer = window.setTimeout(() => {
     els.resultEffect.className = "result-effect";
     els.resultEffect.innerHTML = "";
-  }, 1150);
+  }, 2300);
 }
 
 els.navItems.forEach((item) => {
@@ -915,6 +971,17 @@ els.cardManager.addEventListener("click", (event) => {
 
 els.deleteAllCards.addEventListener("click", deleteAllCards);
 els.toggleBgm.addEventListener("click", toggleBgm);
+els.levelInfo.addEventListener("click", () => {
+  window.alert("Levelは累計XPから決まります。100XPたまるごとにLevelが1つ上がります。");
+});
+els.xpInfo.addEventListener("click", () => {
+  window.alert("XPは正解すると増える経験値です。続けるほどLevelが上がります。");
+});
+els.saveEdit.addEventListener("click", saveEditedCard);
+els.cancelEdit.addEventListener("click", closeEditPanel);
+els.editPanel.addEventListener("click", (event) => {
+  if (event.target === els.editPanel) closeEditPanel();
+});
 
 els.resetData.addEventListener("click", () => {
   const ok = window.confirm("単語カードと記録をすべて削除しますか？");

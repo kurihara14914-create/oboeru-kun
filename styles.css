@@ -37,7 +37,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -70,7 +71,8 @@ input:disabled {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -80,12 +82,18 @@ textarea {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(21, 111, 122, 0.14);
 }
 
 input {
+  min-height: 50px;
+  padding: 0 14px;
+}
+
+select {
   min-height: 50px;
   padding: 0 14px;
 }
@@ -226,6 +234,17 @@ h2 {
   transition: width 220ms ease;
 }
 
+.progress-detail {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.progress-detail strong {
+  color: var(--ink);
+}
+
 .quick-stats,
 .record-grid {
   display: grid;
@@ -240,12 +259,24 @@ h2 {
 }
 
 .quick-stats div,
+.stat-card,
 .record-grid div {
   display: grid;
   min-height: 78px;
   padding: 12px;
   align-content: center;
   background: #fff;
+}
+
+.stat-card {
+  color: var(--ink);
+  border-radius: 0;
+  text-align: left;
+}
+
+.stat-card:hover {
+  box-shadow: none;
+  transform: none;
 }
 
 .quick-stats strong,
@@ -335,6 +366,7 @@ h2 {
   margin-top: 8px;
   color: var(--muted);
   font-size: 0.75rem;
+  font-weight: 400;
   line-height: 1.35;
 }
 
@@ -531,6 +563,37 @@ h2 {
   display: block;
 }
 
+.edit-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: end center;
+  padding: 14px;
+  background: rgba(23, 24, 28, 0.32);
+}
+
+.edit-panel.hidden {
+  display: none;
+}
+
+.edit-sheet {
+  display: grid;
+  width: min(100%, 640px);
+  max-height: calc(100vh - 28px);
+  gap: 12px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.edit-sheet textarea {
+  min-height: 110px;
+}
+
 .result-effect {
   position: fixed;
   inset: 0;
@@ -557,7 +620,7 @@ h2 {
   color: #fff;
   box-shadow: 0 24px 70px rgba(23, 24, 28, 0.24);
   text-align: center;
-  animation: badge-in 700ms cubic-bezier(0.18, 1.25, 0.28, 1);
+  animation: badge-in 1400ms cubic-bezier(0.18, 1.25, 0.28, 1);
 }
 
 .result-effect.correct .result-badge {
@@ -621,7 +684,7 @@ h2 {
   border-radius: 999px;
   background: #fff176;
   opacity: 0;
-  animation: confetti 850ms ease-out forwards;
+  animation: confetti 1700ms ease-out forwards;
 }
 
 .bit-1 {
@@ -674,7 +737,7 @@ h2 {
   height: 90px;
   border: 4px solid rgba(255, 255, 255, 0.42);
   border-radius: 50%;
-  animation: sad-ring 900ms ease-out forwards;
+  animation: sad-ring 1800ms ease-out forwards;
 }
 
 .sad-ring.delay {
