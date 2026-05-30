@@ -330,6 +330,18 @@ h2 {
   align-items: start;
 }
 
+.subject-start {
+  min-height: auto;
+  width: 100%;
+  color: var(--ink);
+  background: #fbfcff;
+  text-align: left;
+}
+
+.subject-start:hover {
+  box-shadow: 0 8px 20px rgba(32, 33, 36, 0.08);
+}
+
 .list-item strong {
   display: block;
   margin-top: 6px;
@@ -368,6 +380,16 @@ h2 {
   font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.35;
+}
+
+.manager-tools {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
 }
 
 .small-danger {

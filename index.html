@@ -124,6 +124,16 @@
           </div>
           <button id="deleteAllCards" type="button" class="danger">全削除</button>
         </div>
+        <div class="manager-tools" aria-label="単語カード検索と並び替え">
+          <input id="managerSearch" type="search" placeholder="検索" />
+          <select id="managerSubject" aria-label="科目で絞り込み"></select>
+          <select id="managerSort" aria-label="表示順">
+            <option value="created-desc">追加日（新しい順）</option>
+            <option value="created-asc">追加日（古い順）</option>
+            <option value="updated-desc">最終編集日（新しい順）</option>
+            <option value="updated-asc">最終編集日（古い順）</option>
+          </select>
+        </div>
         <div class="card-list" id="cardManager"></div>
       </section>
 

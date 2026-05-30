@@ -108,6 +108,9 @@ const els = {
   copyAiPrompt: document.querySelector("#copyAiPrompt"),
   deleteAllCards: document.querySelector("#deleteAllCards"),
   cardManager: document.querySelector("#cardManager"),
+  managerSearch: document.querySelector("#managerSearch"),
+  managerSubject: document.querySelector("#managerSubject"),
+  managerSort: document.querySelector("#managerSort"),
   weakStartTop: document.querySelector("#weakStartTop"),
   weakList: document.querySelector("#weakList"),
   totalCards: document.querySelector("#totalCards"),
@@ -315,6 +318,10 @@ function weakCards() {
   return [...state.data.cards].filter((card) => card.mistakes > 0).sort((a, b) => b.mistakes - a.mistakes);
 }
 
+function cardsBySubject(subject) {
+  return state.data.cards.filter((card) => card.subject === subject);
+}
+
 function getCurrentCard() {
   const id = state.session.ids[0];
   return state.data.cards.find((card) => card.id === id);
@@ -473,6 +480,7 @@ function showView(viewId) {
 function renderAll() {
   renderToday();
   renderSubjectPicker();
+  renderManagerControls();
   renderTraining();
   renderCardManager();
   renderWeakList();
@@ -503,7 +511,12 @@ function renderToday() {
     .sort((a, b) => b[1].length - a[1].length)
     .map(([subject, cards]) => {
       const dueCount = cards.filter((card) => card.dueAt <= TODAY).length;
-      return `<div class="subject-tile"><strong>${escapeHtml(subject)}</strong><span>単語カード${cards.length}枚 / 今日${dueCount}枚</span></div>`;
+      return `
+        <button class="subject-tile subject-start" type="button" data-start-subject="${escapeHtml(subject)}">
+          <strong>${escapeHtml(subject)}</strong>
+          <span>単語カード${cards.length}枚 / 今日${dueCount}枚</span>
+        </button>
+      `;
     })
     .join("");
 }
@@ -513,6 +526,14 @@ function renderSubjectPicker() {
     (subject) =>
       `<button class="subject-choice ${subject === state.selectedSubject ? "active" : ""}" type="button" data-subject="${escapeHtml(subject)}">${escapeHtml(subject)}</button>`,
   ).join("");
+}
+
+function renderManagerControls() {
+  const selected = els.managerSubject.value || "すべて";
+  els.managerSubject.innerHTML = ["すべて", ...SUBJECTS]
+    .map((subject) => `<option value="${escapeHtml(subject)}">${escapeHtml(subject)}</option>`)
+    .join("");
+  els.managerSubject.value = [...SUBJECTS, "すべて"].includes(selected) ? selected : "すべて";
 }
 
 function renderTraining() {
@@ -545,13 +566,37 @@ function renderTraining() {
 }
 
 function renderCardManager() {
+  const query = normalize(els.managerSearch.value);
+  const selectedSubject = els.managerSubject.value || "すべて";
+  const sortMode = els.managerSort.value || "created-desc";
+  const cards = state.data.cards
+    .filter((card) => selectedSubject === "すべて" || card.subject === selectedSubject)
+    .filter((card) => {
+      if (!query) return true;
+      return normalize(`${card.subject} ${card.prompt} ${card.answer}`).includes(query);
+    })
+    .sort((a, b) => {
+      const leftCreated = new Date(a.createdAt || 0).getTime();
+      const rightCreated = new Date(b.createdAt || 0).getTime();
+      const leftUpdated = new Date(a.updatedAt || a.createdAt || 0).getTime();
+      const rightUpdated = new Date(b.updatedAt || b.createdAt || 0).getTime();
+      if (sortMode === "created-asc") return leftCreated - rightCreated;
+      if (sortMode === "updated-desc") return rightUpdated - leftUpdated;
+      if (sortMode === "updated-asc") return leftUpdated - rightUpdated;
+      return rightCreated - leftCreated;
+    });
+
   if (!state.data.cards.length) {
     els.cardManager.innerHTML = '<div class="empty">まだ単語カードはありません。</div>';
     return;
   }
 
-  els.cardManager.innerHTML = [...state.data.cards]
-    .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))
+  if (!cards.length) {
+    els.cardManager.innerHTML = '<div class="empty">条件に合う単語カードがありません。</div>';
+    return;
+  }
+
+  els.cardManager.innerHTML = cards
     .map(
       (card) => `
         <article class="list-item manage-item">
@@ -830,6 +875,17 @@ els.navItems.forEach((item) => {
   item.addEventListener("click", () => showView(item.dataset.view));
 });
 
+els.todaySubjects.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-start-subject]");
+  if (!button) return;
+  const subject = button.dataset.startSubject;
+  const subjectCards = cardsBySubject(subject);
+  const dueSubjectCards = subjectCards.filter((card) => card.dueAt <= TODAY);
+  const cards = dueSubjectCards.length ? dueSubjectCards : subjectCards;
+  if (!cards.length) return showToast("この科目の単語カードがありません");
+  startSession(cards, `${subject}を覚える`);
+});
+
 els.startDue.addEventListener("click", () => {
   const cards = dueCards();
   if (!cards.length) return showToast("今日の復習単語カードはありません");
@@ -985,6 +1041,9 @@ els.cardManager.addEventListener("click", (event) => {
 });
 
 els.deleteAllCards.addEventListener("click", deleteAllCards);
+els.managerSearch.addEventListener("input", renderCardManager);
+els.managerSubject.addEventListener("change", renderCardManager);
+els.managerSort.addEventListener("change", renderCardManager);
 els.toggleBgm.addEventListener("click", toggleBgm);
 els.levelInfo.addEventListener("click", () => {
   showInfo("Levelは累計XPから決まります。100XPたまるごとにLevelが1つ上がります。");
