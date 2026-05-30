@@ -119,6 +119,7 @@ const els = {
   weakStartTop: document.querySelector("#weakStartTop"),
   weakList: document.querySelector("#weakList"),
   totalCards: document.querySelector("#totalCards"),
+  masteredInfo: document.querySelector("#masteredInfo"),
   masteredCards: document.querySelector("#masteredCards"),
   todayCorrect: document.querySelector("#todayCorrect"),
   todayMistakes: document.querySelector("#todayMistakes"),
@@ -145,6 +146,8 @@ let bgmStep = 0;
 let bgmEnabled = false;
 let editingCardId = "";
 let studyTickStartedAt = document.visibilityState === "visible" ? Date.now() : 0;
+let bulkDeleteMode = false;
+let selectedDeleteIds = new Set();
 
 function loadData() {
   const initial = {
@@ -425,15 +428,26 @@ function deleteCard(cardId) {
   showToast("単語カードを削除しました");
 }
 
-function deleteAllCards() {
+function runBulkDelete() {
   if (!state.data.cards.length) return showToast("削除する単語カードがありません");
-  const ok = window.confirm("すべての単語カードを削除しますか？\n記録は残ります。");
+  if (!bulkDeleteMode) {
+    bulkDeleteMode = true;
+    selectedDeleteIds = new Set();
+    renderCardManager();
+    return;
+  }
+
+  if (!selectedDeleteIds.size) return showToast("削除する単語カードを選んでください");
+  const ok = window.confirm("選択したカードを全て削除しますか？");
   if (!ok) return;
-  state.data.cards = [];
-  state.session = { ids: [], answered: 0, mode: "今日の復習", score: 0, combo: 0, awaitingNext: false };
+  state.data.cards = state.data.cards.filter((card) => !selectedDeleteIds.has(card.id));
+  state.session.ids = state.session.ids.filter((id) => !selectedDeleteIds.has(id));
+  state.session.awaitingNext = false;
+  bulkDeleteMode = false;
+  selectedDeleteIds = new Set();
   saveData();
   renderAll();
-  showToast("すべての単語カードを削除しました");
+  showToast("選択した単語カードを削除しました");
 }
 
 function completeCurrentCard() {
@@ -621,11 +635,13 @@ function renderCardManager() {
 
   if (!state.data.cards.length) {
     els.cardManager.innerHTML = '<div class="empty">まだ単語カードはありません。</div>';
+    els.deleteAllCards.textContent = "まとめて削除";
     return;
   }
 
   if (!cards.length) {
     els.cardManager.innerHTML = '<div class="empty">条件に合う単語カードがありません。</div>';
+    els.deleteAllCards.textContent = bulkDeleteMode ? "選択したカードを削除" : "まとめて削除";
     return;
   }
 
@@ -633,17 +649,23 @@ function renderCardManager() {
     .map(
       (card) => `
         <article class="list-item manage-item">
-          <button class="manage-body" type="button" data-edit-card="${escapeHtml(card.id)}">
+          ${
+            bulkDeleteMode
+              ? `<label class="delete-check"><input type="checkbox" data-select-delete="${escapeHtml(card.id)}" ${selectedDeleteIds.has(card.id) ? "checked" : ""} /><span></span></label>`
+              : ""
+          }
+          <button class="manage-body" type="button" ${bulkDeleteMode ? "" : `data-edit-card="${escapeHtml(card.id)}"`}>
             <span class="subject-badge">${escapeHtml(card.subject)}</span>
             <strong>${escapeHtml(card.prompt)}</strong>
             <p>${escapeHtml(card.answer)}</p>
             <small>追加日 ${formatDate(card.createdAt)} / 最終編集日 ${formatDate(card.updatedAt || card.createdAt)}</small>
           </button>
-          <button class="small-danger" type="button" data-delete-card="${escapeHtml(card.id)}">削除</button>
+          ${bulkDeleteMode ? "" : `<button class="small-danger" type="button" data-delete-card="${escapeHtml(card.id)}">削除</button>`}
         </article>
       `,
     )
     .join("");
+  els.deleteAllCards.textContent = bulkDeleteMode ? "選択したカードを削除" : "まとめて削除";
 }
 
 function formatDate(value) {
@@ -701,7 +723,7 @@ function renderRecords() {
             <p>単語カード${cards.length}枚 / 今日${due}枚</p>
           </div>
           <div class="record-status" aria-label="${escapeHtml(subject)}の習得状況">
-            <div class="record-status-row mastered"><span>覚えた</span><strong>${mastered}枚</strong></div>
+            <button class="record-status-row mastered" type="button" data-mastered-info><span>覚えた</span><strong>${mastered}枚</strong></button>
             <div class="record-status-row pending"><span>まだ</span><strong>${notMastered}枚</strong></div>
           </div>
         </article>
@@ -741,6 +763,10 @@ function formatStudyTime(seconds) {
   const hours = Math.floor(minutes / 60);
   const restMinutes = minutes % 60;
   return restMinutes ? `${hours}時間${restMinutes}分` : `${hours}時間`;
+}
+
+function showMasteredInfo() {
+  showInfo("覚えたカードは、1回以上ミスしたあとに2回以上連続で正解し、その後まだミスしていない単語カードです。");
 }
 
 function groupBySubject(cards) {
@@ -1113,6 +1139,16 @@ els.copyAiPrompt.addEventListener("click", async () => {
 });
 
 els.cardManager.addEventListener("click", (event) => {
+  const selectBox = event.target.closest("[data-select-delete]");
+  if (selectBox) {
+    if (selectBox.checked) {
+      selectedDeleteIds.add(selectBox.dataset.selectDelete);
+    } else {
+      selectedDeleteIds.delete(selectBox.dataset.selectDelete);
+    }
+    return;
+  }
+
   const deleteButton = event.target.closest("[data-delete-card]");
   if (deleteButton) {
     deleteCard(deleteButton.dataset.deleteCard);
@@ -1123,7 +1159,12 @@ els.cardManager.addEventListener("click", (event) => {
   editCard(editButton.dataset.editCard);
 });
 
-els.deleteAllCards.addEventListener("click", deleteAllCards);
+els.subjectStats.addEventListener("click", (event) => {
+  if (!event.target.closest("[data-mastered-info]")) return;
+  showMasteredInfo();
+});
+
+els.deleteAllCards.addEventListener("click", runBulkDelete);
 els.managerSearch.addEventListener("input", renderCardManager);
 els.managerSubject.addEventListener("change", renderCardManager);
 els.managerSort.addEventListener("change", renderCardManager);
@@ -1134,6 +1175,7 @@ els.levelInfo.addEventListener("click", () => {
 els.xpInfo.addEventListener("click", () => {
   showInfo("XPは正解すると増える経験値です。続けるほどLevelが上がります。");
 });
+els.masteredInfo.addEventListener("click", showMasteredInfo);
 els.saveEdit.addEventListener("click", saveEditedCard);
 els.cancelEdit.addEventListener("click", closeEditPanel);
 els.editPanel.addEventListener("click", (event) => {
@@ -1169,6 +1211,8 @@ els.resetData.addEventListener("click", () => {
   state.data = loadData();
   state.session = { ids: [], answered: 0, mode: "今日の復習", score: 0, combo: 0, awaitingNext: false };
   studyTickStartedAt = Date.now();
+  bulkDeleteMode = false;
+  selectedDeleteIds = new Set();
   renderAll();
   showToast("リセットしました");
 });

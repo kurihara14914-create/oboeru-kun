@@ -13,8 +13,8 @@
   --selected-2: #7f90a8;
   --selected-ink: #1f344d;
   --good: #16784f;
-  --bad: #9b4a43;
-  --bad-2: #7d3934;
+  --bad: #8b6763;
+  --bad-2: #725854;
   --soft: #eef6f7;
   --shadow: 0 16px 44px rgba(23, 24, 28, 0.1);
   --nav-height: 76px;
@@ -268,6 +268,7 @@ h2 {
 
 .quick-stats div,
 .stat-card,
+.record-stat-button,
 .record-grid div {
   display: grid;
   min-height: 78px;
@@ -276,13 +277,15 @@ h2 {
   background: #fff;
 }
 
-.stat-card {
+.stat-card,
+.record-stat-button {
   color: var(--ink);
   border-radius: 0;
   text-align: left;
 }
 
-.stat-card:hover {
+.stat-card:hover,
+.record-stat-button:hover {
   box-shadow: none;
   transform: none;
 }
@@ -366,30 +369,30 @@ h2 {
 }
 
 .record-status {
-  display: grid;
+  display: flex;
   min-width: 132px;
-  gap: 8px;
+  gap: 18px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .record-status-row {
-  display: flex;
+  display: grid;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 8px 10px;
-  border: 1px solid currentColor;
-  border-radius: 8px;
-  background: #fff;
+  justify-items: start;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .record-status-row.mastered {
   color: #c84c35;
-  background: #fff2ee;
 }
 
 .record-status-row.pending {
   color: #2d6594;
-  background: #edf6ff;
 }
 
 .record-status-row span {
@@ -448,6 +451,20 @@ h2 {
   padding: 0 12px;
   background: var(--bad-2);
   font-size: 0.88rem;
+}
+
+.delete-check {
+  display: grid;
+  width: 34px;
+  min-width: 34px;
+  place-items: center;
+}
+
+.delete-check input {
+  width: 22px;
+  height: 22px;
+  min-height: auto;
+  accent-color: var(--bad-2);
 }
 
 .training-card {
