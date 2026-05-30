@@ -93,9 +93,9 @@
 
         <div class="subject-picker" id="subjectPicker" aria-label="科目選択"></div>
 
-        <label class="input-label" for="manualFront">表: 穴埋め文</label>
-        <input id="manualFront" type="text" placeholder="例: abandon = ？？？" />
-        <label class="input-label" for="manualBack">裏: ？？？に入る答え</label>
+        <label class="input-label" for="manualFront">表: 問題</label>
+        <input id="manualFront" type="text" placeholder="例: abandon" />
+        <label class="input-label" for="manualBack">裏: 答え</label>
         <input id="manualBack" type="text" placeholder="例: 捨てる / 放棄する" />
         <button id="addManual" type="button">1枚追加</button>
 
@@ -103,7 +103,7 @@
           <label class="input-label" for="bulkText">Markdownまとめ貼り</label>
           <button id="copyAiPrompt" type="button" class="secondary small-action">AIプロンプト</button>
         </div>
-        <textarea id="bulkText" spellcheck="false" placeholder="- abandon = ？？？: 捨てる / 放棄する&#10;- 季節によって向きが変わる風を？？？という: 季節風"></textarea>
+        <textarea id="bulkText" spellcheck="false" placeholder="- abandon: 捨てる / 放棄する&#10;- 季節によって向きが変わる風を？？？という: 季節風"></textarea>
         <div class="action-grid">
           <button id="importBulk" type="button">まとめて追加</button>
           <button id="sampleBulk" type="button" class="secondary">例を入れる</button>
