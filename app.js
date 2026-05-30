@@ -119,6 +119,7 @@ const els = {
   weakStartTop: document.querySelector("#weakStartTop"),
   weakList: document.querySelector("#weakList"),
   totalCards: document.querySelector("#totalCards"),
+  masteredCards: document.querySelector("#masteredCards"),
   todayCorrect: document.querySelector("#todayCorrect"),
   todayMistakes: document.querySelector("#todayMistakes"),
   totalReviews: document.querySelector("#totalReviews"),
@@ -181,6 +182,9 @@ function normalizeCardRecord(card) {
   return {
     ...card,
     subject: normalizeSubject(card.subject || "未設定"),
+    mistakes: Number.isFinite(card.mistakes) ? card.mistakes : 0,
+    correctStreak: Number.isFinite(card.correctStreak) ? card.correctStreak : 0,
+    interval: Number.isFinite(card.interval) ? card.interval : 0,
     createdAt,
     updatedAt: card.updatedAt || createdAt,
   };
@@ -670,6 +674,7 @@ function renderWeakList() {
 
 function renderRecords() {
   els.totalCards.textContent = String(state.data.cards.length);
+  els.masteredCards.textContent = String(masteredCards().length);
   els.todayCorrect.textContent = String(state.data.stats.todayCorrect);
   els.todayMistakes.textContent = String(state.data.stats.todayMistakes);
   els.totalReviews.textContent = String(state.data.stats.totalReviews);
@@ -687,6 +692,10 @@ function renderRecords() {
       return `<article class="list-item"><div><strong>${escapeHtml(subject)}</strong><p>単語カード${cards.length}枚 / 今日${due}枚</p></div><small>${mistakes}ミス</small></article>`;
     })
     .join("");
+}
+
+function masteredCards() {
+  return state.data.cards.filter((card) => card.mistakes > 0 && card.correctStreak >= 2);
 }
 
 function groupBySubject(cards) {
