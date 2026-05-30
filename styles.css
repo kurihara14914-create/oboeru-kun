@@ -7,6 +7,10 @@
   --line: #e3e7ef;
   --accent: #156f7a;
   --accent-2: #3157a4;
+  --action: #157f67;
+  --action-2: #0f6658;
+  --selected: #3157a4;
+  --selected-2: #243f7f;
   --good: #16784f;
   --bad: #bd2f22;
   --soft: #eef6f7;
@@ -48,7 +52,7 @@ button {
   border-radius: 8px;
   padding: 0 16px;
   color: #fff;
-  background: var(--accent);
+  background: var(--action);
   font-weight: 800;
   cursor: pointer;
 }
@@ -170,7 +174,7 @@ h2 {
 
 .icon-button.active {
   color: #fff;
-  background: var(--accent-2);
+  background: var(--selected);
   box-shadow: 0 10px 24px rgba(49, 87, 164, 0.26);
 }
 
@@ -492,7 +496,7 @@ h2 {
 
 .subject-choice.active {
   color: #fff;
-  background: var(--accent-2);
+  background: var(--selected);
 }
 
 .input-label {
@@ -529,7 +533,7 @@ h2 {
 .mode-switch-button.active,
 .submode-button.active {
   color: #fff;
-  background: var(--accent);
+  background: var(--selected);
 }
 
 .create-panel,
@@ -541,6 +545,10 @@ h2 {
 .create-mode.active {
   display: grid;
   gap: 14px;
+}
+
+#bulkCreate .action-grid {
+  grid-template-columns: 1fr;
 }
 
 .small-action {
@@ -579,7 +587,7 @@ h2 {
 
 .nav-item.active {
   color: #fff;
-  background: var(--accent);
+  background: var(--selected);
 }
 
 .nav-item[data-view="createView"] {
@@ -589,14 +597,14 @@ h2 {
   border: 4px solid #fff;
   border-radius: 999px;
   color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--action), var(--action-2));
   box-shadow: 0 12px 28px rgba(21, 111, 122, 0.26);
   font-size: 0.66rem;
   font-weight: 900;
 }
 
 .nav-item[data-view="createView"].active {
-  background: linear-gradient(135deg, #13937e, var(--accent-2));
+  background: linear-gradient(135deg, var(--action), var(--selected));
   box-shadow: 0 16px 34px rgba(49, 87, 164, 0.34);
 }
 
