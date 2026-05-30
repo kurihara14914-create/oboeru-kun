@@ -817,6 +817,7 @@ h2 {
 }
 
 .edit-sheet {
+  position: relative;
   display: grid;
   width: min(100%, 640px);
   max-height: calc(100vh - 28px);
@@ -827,6 +828,17 @@ h2 {
   padding: 16px;
   background: #fff;
   box-shadow: var(--shadow);
+}
+
+.edit-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+}
+
+.edit-sheet .section-head.compact {
+  padding-right: 64px;
 }
 
 .edit-sheet textarea {
