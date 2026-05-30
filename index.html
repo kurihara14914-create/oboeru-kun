@@ -93,48 +93,66 @@
       </section>
 
       <section class="view" id="createView" aria-label="単語カード作成/管理">
-        <div class="section-head">
-          <div>
-            <h2>新規カード作成</h2>
+        <div class="mode-switch" aria-label="単語カード作成と管理の切替">
+          <button class="mode-switch-button active" type="button" data-create-section="createPanel">新規作成</button>
+          <button class="mode-switch-button" type="button" data-create-section="managePanel">管理</button>
+        </div>
+
+        <section class="create-panel active" id="createPanel" aria-label="新規カード作成">
+          <div class="section-head">
+            <div>
+              <h2>新規カード作成</h2>
+            </div>
           </div>
-        </div>
 
-        <label class="input-label">科目</label>
-        <div class="subject-picker" id="subjectPicker" aria-label="科目選択"></div>
+          <label class="input-label">科目</label>
+          <div class="subject-picker" id="subjectPicker" aria-label="科目選択"></div>
 
-        <label class="input-label" for="manualFront">表: 問題</label>
-        <input id="manualFront" type="text" placeholder="例: abandon" />
-        <label class="input-label" for="manualBack">裏: 答え</label>
-        <input id="manualBack" type="text" placeholder="例: 捨てる / 放棄する" />
-        <button id="addManual" type="button">1枚追加</button>
-
-        <div class="label-row">
-          <label class="input-label" for="bulkText">Markdownまとめ貼り</label>
-          <button id="copyAiPrompt" type="button" class="secondary small-action">AIプロンプト</button>
-        </div>
-        <textarea id="bulkText" spellcheck="false" placeholder="- abandon: 捨てる / 放棄する&#10;- 季節によって向きが変わる風を？？？という: 季節風"></textarea>
-        <div class="action-grid">
-          <button id="importBulk" type="button">まとめて追加</button>
-          <button id="sampleBulk" type="button" class="secondary">例を入れる</button>
-        </div>
-
-        <div class="section-head compact">
-          <div>
-            <h2 class="manager-title">単語カード管理</h2>
+          <div class="submode-switch" aria-label="追加方法">
+            <button class="submode-button active" type="button" data-create-mode="singleCreate">1枚ずつ</button>
+            <button class="submode-button" type="button" data-create-mode="bulkCreate">まとめて貼る</button>
           </div>
-          <button id="deleteAllCards" type="button" class="danger">全削除</button>
-        </div>
-        <div class="manager-tools" aria-label="単語カード検索と並び替え">
-          <input id="managerSearch" type="search" placeholder="検索" />
-          <select id="managerSubject" aria-label="科目で絞り込み"></select>
-          <select id="managerSort" aria-label="表示順">
-            <option value="created-desc">追加日（新しい順）</option>
-            <option value="created-asc">追加日（古い順）</option>
-            <option value="updated-desc">最終編集日（新しい順）</option>
-            <option value="updated-asc">最終編集日（古い順）</option>
-          </select>
-        </div>
-        <div class="card-list" id="cardManager"></div>
+
+          <div class="create-mode active" id="singleCreate">
+            <label class="input-label" for="manualFront">表: 問題</label>
+            <input id="manualFront" type="text" placeholder="例: abandon" />
+            <label class="input-label" for="manualBack">裏: 答え</label>
+            <input id="manualBack" type="text" placeholder="例: 捨てる / 放棄する" />
+            <button id="addManual" type="button">1枚追加</button>
+          </div>
+
+          <div class="create-mode" id="bulkCreate">
+            <div class="label-row">
+              <label class="input-label" for="bulkText">Markdownまとめ貼り</label>
+              <button id="copyAiPrompt" type="button" class="secondary small-action">AIプロンプト</button>
+            </div>
+            <textarea id="bulkText" spellcheck="false" placeholder="- abandon: 捨てる / 放棄する&#10;- 季節によって向きが変わる風を？？？という: 季節風"></textarea>
+            <div class="action-grid">
+              <button id="importBulk" type="button">まとめて追加</button>
+              <button id="sampleBulk" type="button" class="secondary">例を入れる</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="create-panel" id="managePanel" aria-label="単語カード管理">
+          <div class="section-head compact">
+            <div>
+              <h2 class="manager-title">単語カード管理</h2>
+            </div>
+            <button id="deleteAllCards" type="button" class="danger">全削除</button>
+          </div>
+          <div class="manager-tools" aria-label="単語カード検索と並び替え">
+            <input id="managerSearch" type="search" placeholder="検索" />
+            <select id="managerSubject" aria-label="科目で絞り込み"></select>
+            <select id="managerSort" aria-label="表示順">
+              <option value="created-desc">追加日（新しい順）</option>
+              <option value="created-asc">追加日（古い順）</option>
+              <option value="updated-desc">最終編集日（新しい順）</option>
+              <option value="updated-asc">最終編集日（古い順）</option>
+            </select>
+          </div>
+          <div class="card-list" id="cardManager"></div>
+        </section>
       </section>
 
       <section class="view" id="weakView" aria-label="弱点">

@@ -507,6 +507,42 @@ h2 {
   gap: 10px;
 }
 
+.mode-switch,
+.submode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.mode-switch-button,
+.submode-button {
+  min-height: 44px;
+  color: var(--muted);
+  background: transparent;
+}
+
+.mode-switch-button.active,
+.submode-button.active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.create-panel,
+.create-mode {
+  display: none;
+}
+
+.create-panel.active,
+.create-mode.active {
+  display: grid;
+  gap: 14px;
+}
+
 .small-action {
   min-height: 36px;
   padding: 0 12px;

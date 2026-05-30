@@ -73,6 +73,10 @@ const state = {
 const els = {
   views: document.querySelectorAll(".view"),
   navItems: document.querySelectorAll(".nav-item"),
+  createSectionButtons: document.querySelectorAll("[data-create-section]"),
+  createPanels: document.querySelectorAll(".create-panel"),
+  createModeButtons: document.querySelectorAll("[data-create-mode]"),
+  createModes: document.querySelectorAll(".create-mode"),
   dueCount: document.querySelector("#dueCount"),
   progressDone: document.querySelector("#progressDone"),
   progressTotal: document.querySelector("#progressTotal"),
@@ -873,6 +877,22 @@ function clearResultEffect() {
 
 els.navItems.forEach((item) => {
   item.addEventListener("click", () => showView(item.dataset.view));
+});
+
+els.createSectionButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const panelId = button.dataset.createSection;
+    els.createSectionButtons.forEach((item) => item.classList.toggle("active", item === button));
+    els.createPanels.forEach((panel) => panel.classList.toggle("active", panel.id === panelId));
+  });
+});
+
+els.createModeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const modeId = button.dataset.createMode;
+    els.createModeButtons.forEach((item) => item.classList.toggle("active", item === button));
+    els.createModes.forEach((mode) => mode.classList.toggle("active", mode.id === modeId));
+  });
 });
 
 els.todaySubjects.addEventListener("click", (event) => {
