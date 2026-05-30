@@ -88,6 +88,7 @@ const els = {
   sessionProgress: document.querySelector("#sessionProgress"),
   trainModeLabel: document.querySelector("#trainModeLabel"),
   question: document.querySelector("#question"),
+  trainingCard: document.querySelector(".training-card"),
   answerForm: document.querySelector("#answerForm"),
   answer: document.querySelector("#answer"),
   feedback: document.querySelector("#feedback"),
@@ -114,7 +115,10 @@ const els = {
   subjectStats: document.querySelector("#subjectStats"),
   resetData: document.querySelector("#resetData"),
   toast: document.querySelector("#toast"),
+  resultEffect: document.querySelector("#resultEffect"),
 };
+
+let audioContext;
 
 function loadData() {
   const initial = {
@@ -551,6 +555,67 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => els.toast.classList.remove("show"), 1800);
 }
 
+function getAudioContext() {
+  const AudioCtor = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtor) return null;
+  audioContext = audioContext || new AudioCtor();
+  if (audioContext.state === "suspended") audioContext.resume();
+  return audioContext;
+}
+
+function playTone(frequency, start, duration, type = "sine", gainValue = 0.08) {
+  const context = getAudioContext();
+  if (!context) return;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, context.currentTime + start);
+  gain.gain.setValueAtTime(0.0001, context.currentTime + start);
+  gain.gain.exponentialRampToValueAtTime(gainValue, context.currentTime + start + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + start + duration);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(context.currentTime + start);
+  oscillator.stop(context.currentTime + start + duration + 0.02);
+}
+
+function playResultSound(type) {
+  if (type === "correct") {
+    playTone(523.25, 0, 0.12, "triangle", 0.07);
+    playTone(659.25, 0.08, 0.13, "triangle", 0.08);
+    playTone(783.99, 0.17, 0.18, "triangle", 0.09);
+    return;
+  }
+  playTone(220, 0, 0.18, "sawtooth", 0.055);
+  playTone(164.81, 0.14, 0.24, "sawtooth", 0.045);
+}
+
+function triggerResultEffect(type, detail) {
+  playResultSound(type);
+
+  els.trainingCard.classList.remove("result-correct", "result-wrong");
+  void els.trainingCard.offsetWidth;
+  els.trainingCard.classList.add(type === "correct" ? "result-correct" : "result-wrong");
+
+  const bits =
+    type === "correct"
+      ? Array.from({ length: 18 }, (_, index) => `<i class="burst-bit bit-${index % 6}"></i>`).join("")
+      : '<i class="sad-ring"></i><i class="sad-ring delay"></i>';
+  els.resultEffect.className = `result-effect show ${type}`;
+  els.resultEffect.innerHTML = `
+    <div class="result-badge">
+      ${bits}
+      <strong>${type === "correct" ? "よっしゃ！" : "残念"}</strong>
+      <span>${escapeHtml(detail)}</span>
+    </div>
+  `;
+  window.clearTimeout(triggerResultEffect.timer);
+  triggerResultEffect.timer = window.setTimeout(() => {
+    els.resultEffect.className = "result-effect";
+    els.resultEffect.innerHTML = "";
+  }, 1150);
+}
+
 els.navItems.forEach((item) => {
   item.addEventListener("click", () => showView(item.dataset.view));
 });
@@ -597,6 +662,7 @@ els.answerForm.addEventListener("submit", (event) => {
     renderToday();
     renderWeakList();
     renderRecords();
+    triggerResultEffect("correct", `${state.session.combo} Combo`);
     return;
   }
 
@@ -612,6 +678,7 @@ els.answerForm.addEventListener("submit", (event) => {
   renderToday();
   renderWeakList();
   renderRecords();
+  triggerResultEffect("wrong", "もう一度出ます");
 });
 
 els.hint.addEventListener("click", () => {
@@ -644,6 +711,7 @@ els.skip.addEventListener("click", () => {
   renderToday();
   renderWeakList();
   renderRecords();
+  triggerResultEffect("wrong", "確認して次へ");
 });
 
 els.subjectPicker.addEventListener("click", (event) => {
