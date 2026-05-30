@@ -39,7 +39,7 @@
 ## Markdown形式
 
 ```md
-# 英単語
+# 英語
 - abandon: 捨てる / 放棄する
 - estimate: 見積もる / 推定する
 

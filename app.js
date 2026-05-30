@@ -4,8 +4,6 @@ const TODAY = dateKey(new Date());
 const SUBJECTS = [
   "未設定",
   "英語",
-  "英単語",
-  "英文法",
   "数学",
   "数学I",
   "数学A",
@@ -43,7 +41,7 @@ const AI_PROMPT = `あなたは大学受験向けの単語カード作成アシ�
 - 表: 裏
 
 ルール:
-- 科目名は必ず次のリストから1つだけ選ぶ: 未設定、英語、英単語、英文法、数学、数学I、数学A、数学II、数学B、数学III、数学C、現代文、古文、漢文、日本史、世界史、地理、政治経済、倫理、公共、現代社会、物理、化学、生物、地学、情報、小論文、その他
+- 科目名は必ず次のリストから1つだけ選ぶ: 未設定、英語、数学、数学I、数学A、数学II、数学B、数学III、数学C、現代文、古文、漢文、日本史、世界史、地理、政治経済、倫理、公共、現代社会、物理、化学、生物、地学、情報、小論文、その他
 - 「英語（時事問題・地理）」のように、リスト外の科目名や複合した科目名を作らない
 - 複数の科目にまたがる内容でも、最も近い科目をリストから1つだけ選ぶ
 - どれにも判断できない場合は「未設定」を使う
@@ -114,11 +112,16 @@ const els = {
   totalReviews: document.querySelector("#totalReviews"),
   subjectStats: document.querySelector("#subjectStats"),
   resetData: document.querySelector("#resetData"),
+  toggleBgm: document.querySelector("#toggleBgm"),
   toast: document.querySelector("#toast"),
   resultEffect: document.querySelector("#resultEffect"),
+  milestoneEffect: document.querySelector("#milestoneEffect"),
 };
 
 let audioContext;
+let bgmTimer;
+let bgmStep = 0;
+let bgmEnabled = false;
 
 function loadData() {
   const initial = {
@@ -136,14 +139,31 @@ function loadData() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!parsed || !Array.isArray(parsed.cards)) return initial;
+    const cards = parsed.cards.map(normalizeCardRecord);
     return {
       ...initial,
       ...parsed,
+      cards,
       stats: rolloverToday({ ...initial.stats, ...parsed.stats }),
     };
   } catch {
     return initial;
   }
+}
+
+function normalizeSubject(subject) {
+  if (subject === "英単語" || subject === "英文法") return "英語";
+  return SUBJECTS.includes(subject) ? subject : "未設定";
+}
+
+function normalizeCardRecord(card) {
+  const createdAt = card.createdAt || new Date().toISOString();
+  return {
+    ...card,
+    subject: normalizeSubject(card.subject || "未設定"),
+    createdAt,
+    updatedAt: card.updatedAt || createdAt,
+  };
 }
 
 function rolloverToday(stats) {
@@ -209,7 +229,7 @@ function makeCard(front, back, subject = state.selectedSubject, source = "手入
   const now = new Date().toISOString();
   return {
     id: globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-    subject: subject || "未設定",
+    subject: normalizeSubject(subject || "未設定"),
     prompt,
     answer,
     detail: answer,
@@ -219,6 +239,7 @@ function makeCard(front, back, subject = state.selectedSubject, source = "手入
     interval: 0,
     dueAt: TODAY,
     createdAt: now,
+    updatedAt: now,
     lastReviewedAt: "",
   };
 }
@@ -235,7 +256,8 @@ function parseMarkdown(rawText, fallbackSubject) {
     const heading = line.match(/^#{1,6}\s+(.+)/);
     if (heading) {
       const headingText = cleanMarkdown(heading[1]);
-      section = SUBJECTS.includes(headingText) ? headingText : fallbackSubject || headingText || "未設定";
+      const normalizedHeading = normalizeSubject(headingText);
+      section = normalizedHeading !== "未設定" ? normalizedHeading : fallbackSubject || "未設定";
       continue;
     }
 
@@ -298,6 +320,30 @@ function startSession(cards, modeLabel) {
   };
   showView("trainView");
   renderTraining();
+}
+
+function editCard(cardId) {
+  const card = state.data.cards.find((item) => item.id === cardId);
+  if (!card) return;
+  const prompt = window.prompt("表を編集", card.prompt);
+  if (prompt === null) return;
+  const answer = window.prompt("裏を編集", card.answer);
+  if (answer === null) return;
+  const subject = window.prompt(`科目を編集\n${SUBJECTS.join(" / ")}`, card.subject);
+  if (subject === null) return;
+
+  const nextPrompt = cleanMarkdown(prompt);
+  const nextAnswer = cleanMarkdown(answer);
+  if (!nextPrompt || !nextAnswer) return showToast("表と裏を入力してください");
+
+  card.prompt = nextPrompt;
+  card.answer = nextAnswer;
+  card.detail = nextAnswer;
+  card.subject = normalizeSubject(cleanMarkdown(subject));
+  card.updatedAt = new Date().toISOString();
+  saveData();
+  renderAll();
+  showToast("単語カードを編集しました");
 }
 
 function deleteCard(cardId) {
@@ -478,16 +524,24 @@ function renderCardManager() {
     .map(
       (card) => `
         <article class="list-item manage-item">
-          <div>
+          <button class="manage-body" type="button" data-edit-card="${escapeHtml(card.id)}">
             <span class="subject-badge">${escapeHtml(card.subject)}</span>
             <strong>${escapeHtml(card.prompt)}</strong>
             <p>${escapeHtml(card.answer)}</p>
-          </div>
+            <small>追加 ${formatDate(card.createdAt)} / 編集 ${formatDate(card.updatedAt || card.createdAt)}</small>
+          </button>
           <button class="small-danger" type="button" data-delete-card="${escapeHtml(card.id)}">削除</button>
         </article>
       `,
     )
     .join("");
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function renderWeakList() {
@@ -579,6 +633,24 @@ function playTone(frequency, start, duration, type = "sine", gainValue = 0.08) {
   oscillator.stop(context.currentTime + start + duration + 0.02);
 }
 
+function playNoise(start, duration, gainValue = 0.04) {
+  const context = getAudioContext();
+  if (!context) return;
+  const buffer = context.createBuffer(1, context.sampleRate * duration, context.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let index = 0; index < data.length; index += 1) {
+    data[index] = Math.random() * 2 - 1;
+  }
+  const source = context.createBufferSource();
+  const gain = context.createGain();
+  source.buffer = buffer;
+  gain.gain.setValueAtTime(gainValue, context.currentTime + start);
+  gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + start + duration);
+  source.connect(gain);
+  gain.connect(context.destination);
+  source.start(context.currentTime + start);
+}
+
 function playResultSound(type) {
   if (type === "correct") {
     playTone(523.25, 0, 0.12, "triangle", 0.07);
@@ -588,6 +660,74 @@ function playResultSound(type) {
   }
   playTone(220, 0, 0.18, "sawtooth", 0.055);
   playTone(164.81, 0.14, 0.24, "sawtooth", 0.045);
+}
+
+function playMilestoneSound(type) {
+  if (type === "combo") {
+    playTone(659.25, 0, 0.1, "square", 0.06);
+    playTone(880, 0.09, 0.12, "square", 0.06);
+    playNoise(0.02, 0.12, 0.015);
+    return;
+  }
+  playTone(392, 0, 0.1, "triangle", 0.06);
+  playTone(523.25, 0.08, 0.11, "triangle", 0.07);
+  playTone(783.99, 0.18, 0.18, "triangle", 0.08);
+}
+
+function triggerMilestone(type, text) {
+  playMilestoneSound(type);
+  els.milestoneEffect.className = `milestone-effect show ${type}`;
+  els.milestoneEffect.innerHTML = `<strong>${escapeHtml(text)}</strong>`;
+  window.clearTimeout(triggerMilestone.timer);
+  triggerMilestone.timer = window.setTimeout(() => {
+    els.milestoneEffect.className = "milestone-effect";
+    els.milestoneEffect.innerHTML = "";
+  }, 900);
+}
+
+function maybeTriggerMilestones(previousScore, combo, score) {
+  if (combo >= 3 && (combo === 3 || combo % 5 === 0)) {
+    triggerMilestone("combo", `${combo} COMBO`);
+  }
+
+  const previousBucket = Math.floor(previousScore / 100);
+  const currentBucket = Math.floor(score / 100);
+  if (currentBucket > previousBucket) {
+    window.setTimeout(() => triggerMilestone("score", `${currentBucket * 100} SCORE`), 260);
+  }
+}
+
+function playBgmStep() {
+  if (!bgmEnabled) return;
+  const pattern = [261.63, 329.63, 392, 523.25, 392, 329.63, 440, 587.33];
+  const bass = [130.81, 130.81, 146.83, 146.83, 174.61, 174.61, 196, 196];
+  const note = pattern[bgmStep % pattern.length];
+  const bassNote = bass[bgmStep % bass.length];
+  playTone(note, 0, 0.22, "triangle", 0.018);
+  if (bgmStep % 2 === 0) playTone(bassNote, 0, 0.28, "sine", 0.012);
+  bgmStep += 1;
+}
+
+function startBgm() {
+  bgmEnabled = true;
+  els.toggleBgm.classList.add("active");
+  playBgmStep();
+  window.clearInterval(bgmTimer);
+  bgmTimer = window.setInterval(playBgmStep, 360);
+}
+
+function stopBgm() {
+  bgmEnabled = false;
+  els.toggleBgm.classList.remove("active");
+  window.clearInterval(bgmTimer);
+}
+
+function toggleBgm() {
+  if (bgmEnabled) {
+    stopBgm();
+    return;
+  }
+  startBgm();
 }
 
 function triggerResultEffect(type, detail) {
@@ -605,7 +745,7 @@ function triggerResultEffect(type, detail) {
   els.resultEffect.innerHTML = `
     <div class="result-badge">
       ${bits}
-      <strong>${type === "correct" ? "よっしゃ！" : "残念"}</strong>
+      <strong>${type === "correct" ? "やった！" : "残念"}</strong>
       <span>${escapeHtml(detail)}</span>
     </div>
   `;
@@ -650,6 +790,7 @@ els.answerForm.addEventListener("submit", (event) => {
   if (state.session.awaitingNext) return;
   const score = answerScore(els.answer.value, card.answer);
   if (score >= 0.72) {
+    const previousScore = state.session.score;
     applyCorrect(card);
     state.session.awaitingNext = true;
     els.feedback.className = "feedback good";
@@ -663,6 +804,7 @@ els.answerForm.addEventListener("submit", (event) => {
     renderWeakList();
     renderRecords();
     triggerResultEffect("correct", `${state.session.combo} Combo`);
+    maybeTriggerMilestones(previousScore, state.session.combo, state.session.score);
     return;
   }
 
@@ -737,7 +879,7 @@ els.importBulk.addEventListener("click", () => {
 });
 
 els.sampleBulk.addEventListener("click", () => {
-  els.bulkText.value = `# 英単語
+  els.bulkText.value = `# 英語
 - abandon: 捨てる / 放棄する
 - estimate: 見積もる / 推定する
 
@@ -761,12 +903,18 @@ els.copyAiPrompt.addEventListener("click", async () => {
 });
 
 els.cardManager.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-delete-card]");
-  if (!button) return;
-  deleteCard(button.dataset.deleteCard);
+  const deleteButton = event.target.closest("[data-delete-card]");
+  if (deleteButton) {
+    deleteCard(deleteButton.dataset.deleteCard);
+    return;
+  }
+  const editButton = event.target.closest("[data-edit-card]");
+  if (!editButton) return;
+  editCard(editButton.dataset.editCard);
 });
 
 els.deleteAllCards.addEventListener("click", deleteAllCards);
+els.toggleBgm.addEventListener("click", toggleBgm);
 
 els.resetData.addEventListener("click", () => {
   const ok = window.confirm("単語カードと記録をすべて削除しますか？");

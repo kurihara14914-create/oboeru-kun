@@ -20,9 +20,14 @@
           <p class="eyebrow">oboeru-kun</p>
           <h1>覚えるくん</h1>
         </div>
-        <button class="icon-button" id="resetData" type="button" title="単語カードと記録をリセット" aria-label="単語カードと記録をリセット">
-          <span aria-hidden="true">↺</span>
-        </button>
+        <div class="top-actions">
+          <button class="icon-button" id="toggleBgm" type="button" title="BGM" aria-label="BGM">
+            <span aria-hidden="true">♪</span>
+          </button>
+          <button class="icon-button" id="resetData" type="button" title="単語カードと記録をリセット" aria-label="単語カードと記録をリセット">
+            <span aria-hidden="true">↺</span>
+          </button>
+        </div>
       </header>
 
       <section class="view active" id="todayView" aria-label="今日">
@@ -86,11 +91,12 @@
       <section class="view" id="createView" aria-label="単語カード作成/管理">
         <div class="section-head">
           <div>
-            <p class="mode-label">単語カード作成/管理</p>
-            <h2>貼って、選んで、追加</h2>
+            <p class="mode-label">カード作成</p>
+            <h2>カード作成</h2>
           </div>
         </div>
 
+        <label class="input-label">科目</label>
         <div class="subject-picker" id="subjectPicker" aria-label="科目選択"></div>
 
         <label class="input-label" for="manualFront">表: 問題</label>
@@ -111,8 +117,7 @@
 
         <div class="section-head compact">
           <div>
-            <p class="mode-label">単語カード管理</p>
-            <h2>いらないものを消す</h2>
+            <h2 class="manager-title">単語カード管理</h2>
           </div>
           <button id="deleteAllCards" type="button" class="danger">全削除</button>
         </div>
@@ -157,6 +162,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="result-effect" id="resultEffect" aria-hidden="true"></div>
+    <div class="milestone-effect" id="milestoneEffect" aria-hidden="true"></div>
     <script src="./app.js"></script>
   </body>
 </html>
