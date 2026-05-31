@@ -1,6 +1,6 @@
 {
-  "name": "覚えるくん",
-  "short_name": "覚えるくん",
+  "name": "覚える君 β版",
+  "short_name": "覚える君 β版",
   "description": "大学受験向けの暗記トレーニングアプリ",
   "lang": "ja",
   "start_url": "./index.html",

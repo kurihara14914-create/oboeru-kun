@@ -186,6 +186,14 @@ h2 {
   letter-spacing: 0;
 }
 
+.app-note {
+  margin: 8px 0 0;
+  max-width: 42ch;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
 .icon-button {
   display: grid;
   width: 48px;
